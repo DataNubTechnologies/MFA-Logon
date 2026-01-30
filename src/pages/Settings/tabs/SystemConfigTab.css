@@ -175,6 +175,23 @@
   margin-top: 2px;
 }
 
+.system-config-card-message {
+  font-size: 12px;
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.system-config-card-message.success {
+  background: color-mix(in srgb, var(--success-color) 14%, transparent);
+  color: var(--success-color);
+}
+
+.system-config-card-message.error {
+  background: color-mix(in srgb, var(--danger-color) 12%, transparent);
+  color: var(--danger-color);
+}
+
 .system-config-card-actions {
   display: flex;
   align-items: center;
@@ -198,6 +215,30 @@
 
 .test-connection-btn:hover:not(:disabled) {
   background: color-mix(in srgb, var(--success-color) 8%, transparent);
+}
+
+.test-connection-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.test-connection-btn.loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Empty State */

@@ -1,21 +1,33 @@
-import { useState } from 'react';
-import { FiServer, FiPlus, FiEdit2, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { FiServer, FiPlus, FiEdit2, FiTrash2, FiCheck, FiX, FiLoader } from 'react-icons/fi';
+import { testConnection } from '@services/connectionService';
+import { storeSAPSystems, storeCredentials } from '@services/config';
 import './SystemConfigTab.css';
 
 const SystemConfigTab = () => {
-  const [systems, setSystems] = useState([
-    {
-      id: 'S18',
-      name: 'S18',
-      url: 'https://cloud9.way2erp.us:44300',
-      clients: '400',
-      defaultClient: '400',
-      username: 'D10045',
-      password: '********',
-      status: 'connected',
-      lastTested: '28/1/2026, 9:49:20 am'
+  const [systems, setSystems] = useState(() => {
+    // Load from localStorage on initial render
+    const stored = localStorage.getItem('sapSystems');
+    if (stored) {
+      return JSON.parse(stored);
     }
-  ]);
+    return [
+      {
+        id: 'S18',
+        name: 'S18',
+        url: 'https://cloud9.way2erp.us:44300',
+        clients: '400',
+        defaultClient: '400',
+        username: 'D10045',
+        password: '',
+        status: 'not-connected',
+        lastTested: null
+      }
+    ];
+  });
+
+  const [testingSystem, setTestingSystem] = useState(null);
+  const [connectionMessage, setConnectionMessage] = useState({ systemId: null, type: '', message: '' });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSystem, setEditingSystem] = useState(null);
@@ -88,18 +100,71 @@ const SystemConfigTab = () => {
     closeDialog();
   };
 
+  // Save systems to localStorage whenever they change
+  useEffect(() => {
+    storeSAPSystems(systems);
+  }, [systems]);
+
   const handleDelete = (systemId) => {
     if (window.confirm('Are you sure you want to delete this system?')) {
       setSystems(prev => prev.filter(sys => sys.id !== systemId));
     }
   };
 
-  const handleTestConnection = (systemId) => {
-    setSystems(prev => prev.map(sys => 
-      sys.id === systemId 
-        ? { ...sys, status: 'connected', lastTested: new Date().toLocaleString() }
-        : sys
-    ));
+  const handleTestConnection = async (system) => {
+    setTestingSystem(system.id);
+    setConnectionMessage({ systemId: null, type: '', message: '' });
+
+    // Check if we have password - if not, prompt for it
+    if (!system.password) {
+      const password = window.prompt(`Enter password for user ${system.username}:`);
+      if (!password) {
+        setTestingSystem(null);
+        return;
+      }
+      system = { ...system, password };
+    }
+
+    try {
+      const result = await testConnection(system);
+      
+      if (result.success) {
+        // Store credentials for API calls
+        storeCredentials(system.username, system.password);
+        
+        setSystems(prev => prev.map(sys => 
+          sys.id === system.id 
+            ? { ...sys, password: system.password, status: 'connected', lastTested: new Date().toLocaleString() }
+            : sys
+        ));
+        setConnectionMessage({ 
+          systemId: system.id, 
+          type: 'success', 
+          message: 'Connected successfully!' 
+        });
+      } else {
+        setSystems(prev => prev.map(sys => 
+          sys.id === system.id 
+            ? { ...sys, status: 'not-connected' }
+            : sys
+        ));
+        setConnectionMessage({ 
+          systemId: system.id, 
+          type: 'error', 
+          message: result.message 
+        });
+      }
+    } catch (error) {
+      setConnectionMessage({ 
+        systemId: system.id, 
+        type: 'error', 
+        message: error.message 
+      });
+    } finally {
+      setTestingSystem(null);
+      // Clear message after 5 seconds
+      setTimeout(() => setConnectionMessage({ systemId: null, type: '', message: '' }), 5000);
+    }
   };
 
   return (
@@ -168,14 +233,28 @@ const SystemConfigTab = () => {
                     Last tested: {system.lastTested}
                   </p>
                 )}
+
+                {connectionMessage.systemId === system.id && (
+                  <p className={`system-config-card-message ${connectionMessage.type}`}>
+                    {connectionMessage.message}
+                  </p>
+                )}
               </div>
 
               <div className="system-config-card-actions">
                 <button 
-                  className="test-connection-btn"
-                  onClick={() => handleTestConnection(system.id)}
+                  className={`test-connection-btn ${testingSystem === system.id ? 'loading' : ''}`}
+                  onClick={() => handleTestConnection(system)}
+                  disabled={testingSystem === system.id}
                 >
-                  Test Connection
+                  {testingSystem === system.id ? (
+                    <>
+                      <FiLoader className="spin" size={14} />
+                      Testing...
+                    </>
+                  ) : (
+                    'Test Connection'
+                  )}
                 </button>
                 <button 
                   className="btn-icon"
