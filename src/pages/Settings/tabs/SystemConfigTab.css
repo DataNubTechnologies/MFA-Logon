@@ -374,6 +374,22 @@
   color: var(--text-secondary);
 }
 
+/* Password Dialog */
+.password-dialog {
+  max-width: 400px;
+}
+
+.password-dialog-info {
+  margin: 0 0 16px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.password-dialog-info strong {
+  color: var(--text-primary);
+}
+
 /* Mobile Responsive */
 @media (max-width: 900px) {
   .system-config-header {

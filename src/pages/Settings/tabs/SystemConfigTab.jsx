@@ -7,9 +7,10 @@ import './SystemConfigTab.css';
 const SystemConfigTab = () => {
   const [systems, setSystems] = useState(() => {
     // Load from localStorage on initial render
-    const stored = localStorage.getItem('sapSystems');
+    const stored = localStorage.getItem('sapSystemConfig');
     if (stored) {
-      return JSON.parse(stored);
+      const config = JSON.parse(stored);
+      return config.systems || [];
     }
     return [
       {
@@ -28,6 +29,11 @@ const SystemConfigTab = () => {
 
   const [testingSystem, setTestingSystem] = useState(null);
   const [connectionMessage, setConnectionMessage] = useState({ systemId: null, type: '', message: '' });
+  
+  // Password dialog state
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [passwordDialogSystem, setPasswordDialogSystem] = useState(null);
+  const [passwordInput, setPasswordInput] = useState('');
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSystem, setEditingSystem] = useState(null);
@@ -100,8 +106,14 @@ const SystemConfigTab = () => {
     closeDialog();
   };
 
-  // Save systems to localStorage whenever they change
+  // Save full config to localStorage as JSON whenever systems change
   useEffect(() => {
+    const config = {
+      systems: systems,
+      lastUpdated: new Date().toISOString()
+    };
+    localStorage.setItem('sapSystemConfig', JSON.stringify(config));
+    // Also store in old format for backward compatibility
     storeSAPSystems(systems);
   }, [systems]);
 
@@ -112,18 +124,31 @@ const SystemConfigTab = () => {
   };
 
   const handleTestConnection = async (system) => {
+    // Check if we have password - if not, show password dialog
+    if (!system.password) {
+      setPasswordDialogSystem(system);
+      setPasswordInput('');
+      setIsPasswordDialogOpen(true);
+      return;
+    }
+
+    await executeTestConnection(system);
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (!passwordInput || !passwordDialogSystem) return;
+    
+    const systemWithPassword = { ...passwordDialogSystem, password: passwordInput };
+    setIsPasswordDialogOpen(false);
+    setPasswordInput('');
+    
+    await executeTestConnection(systemWithPassword);
+  };
+
+  const executeTestConnection = async (system) => {
     setTestingSystem(system.id);
     setConnectionMessage({ systemId: null, type: '', message: '' });
-
-    // Check if we have password - if not, prompt for it
-    if (!system.password) {
-      const password = window.prompt(`Enter password for user ${system.username}:`);
-      if (!password) {
-        setTestingSystem(null);
-        return;
-      }
-      system = { ...system, password };
-    }
 
     try {
       const result = await testConnection(system);
@@ -132,6 +157,7 @@ const SystemConfigTab = () => {
         // Store credentials for API calls
         storeCredentials(system.username, system.password);
         
+        // Update system with password and connected status
         setSystems(prev => prev.map(sys => 
           sys.id === system.id 
             ? { ...sys, password: system.password, status: 'connected', lastTested: new Date().toLocaleString() }
@@ -162,6 +188,7 @@ const SystemConfigTab = () => {
       });
     } finally {
       setTestingSystem(null);
+      setPasswordDialogSystem(null);
       // Clear message after 5 seconds
       setTimeout(() => setConnectionMessage({ systemId: null, type: '', message: '' }), 5000);
     }
@@ -389,6 +416,49 @@ const SystemConfigTab = () => {
                 </button>
                 <button type="submit" className="btn btn-primary">
                   {editingSystem ? 'Save Changes' : 'Add System'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Password Dialog */}
+      {isPasswordDialogOpen && passwordDialogSystem && (
+        <div className="system-config-dialog-backdrop" onClick={() => setIsPasswordDialogOpen(false)}>
+          <div className="system-config-dialog password-dialog" onClick={e => e.stopPropagation()}>
+            <div className="system-config-dialog-header">
+              <h4 className="system-config-dialog-title">Enter Password</h4>
+              <button className="btn-icon" onClick={() => setIsPasswordDialogOpen(false)}>
+                <FiX size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handlePasswordSubmit}>
+              <div className="system-config-dialog-body">
+                <p className="password-dialog-info">
+                  Enter password for user <strong>{passwordDialogSystem.username}</strong> on system <strong>{passwordDialogSystem.name}</strong>
+                </p>
+                <div className="form-group">
+                  <label className="form-label">Password *</label>
+                  <input
+                    type="password"
+                    className="form-input"
+                    value={passwordInput}
+                    onChange={(e) => setPasswordInput(e.target.value)}
+                    placeholder="Enter your password"
+                    autoFocus
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="system-config-dialog-actions">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsPasswordDialogOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={!passwordInput}>
+                  Test Connection
                 </button>
               </div>
             </form>
