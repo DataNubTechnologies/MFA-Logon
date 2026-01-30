@@ -1,0 +1,12 @@
+.system-configuration-page {
+  padding: var(--spacing-lg);
+}
+
+.system-configuration-page h2 {
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+.system-configuration-page p {
+  color: var(--text-secondary);
+}

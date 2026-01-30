@@ -1,0 +1,12 @@
+.activity-log-page {
+  padding: var(--spacing-lg);
+}
+
+.activity-log-page h2 {
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+.activity-log-page p {
+  color: var(--text-secondary);
+}

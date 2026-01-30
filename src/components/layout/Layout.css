@@ -1,0 +1,114 @@
+/* Layout Styles - DN Stack Design System */
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 280px;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 32px;
+  padding-top: 112px; /* 80px header + 32px padding */
+  background: var(--bg-primary);
+  min-height: 100vh;
+}
+
+.page-header {
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.page-subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.content-card {
+  background: var(--surface-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 24px;
+}
+
+.content-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.content-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.content-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.content-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Responsive Layout */
+@media (max-width: 1024px) {
+  .main-wrapper {
+    margin-left: 220px;
+  }
+  
+  .main-content {
+    padding: 24px;
+    padding-top: 104px;
+  }
+  
+  .content-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .content-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-wrapper {
+    margin-left: 0;
+  }
+  
+  .main-content {
+    padding: 20px;
+    padding-top: 100px;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .content-grid-2,
+  .content-grid-3,
+  .content-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 16px;
+    padding-top: 96px;
+  }
+  
+  .content-card {
+    padding: 16px;
+  }
+}

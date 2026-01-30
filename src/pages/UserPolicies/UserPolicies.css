@@ -1,0 +1,12 @@
+.user-policies-page {
+  padding: var(--spacing-lg);
+}
+
+.user-policies-page h2 {
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+}
+
+.user-policies-page p {
+  color: var(--text-secondary);
+}
