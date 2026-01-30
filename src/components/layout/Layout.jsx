@@ -15,7 +15,7 @@ const Layout = () => {
       '/': 'Overview',
       '/user-policies': 'User Policies',
       '/activity-log': 'Activity Log',
-      '/system-configuration': 'System Configuration',
+      '/settings': 'Settings',
     };
     return titles[path] || 'MFA Logon';
   };

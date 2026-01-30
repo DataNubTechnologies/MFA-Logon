@@ -1,10 +1,10 @@
 import { NavLink, Link } from 'react-router-dom';
 import { 
   Shield, 
-  Home, 
+  LayoutDashboard, 
   Users, 
   Activity,
-  Settings
+  Settings,
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -13,10 +13,10 @@ const Sidebar = ({ isOpen, onClose }) => {
     {
       section: 'Main Menu',
       items: [
-        { path: '/', label: 'Overview', icon: Home },
+        { path: '/', label: 'Overview', icon: LayoutDashboard },
         { path: '/user-policies', label: 'User Policies', icon: Users },
         { path: '/activity-log', label: 'Activity Log', icon: Activity },
-        { path: '/system-configuration', label: 'System Configuration', icon: Settings },
+        { path: '/settings', label: 'Settings', icon: Settings },
       ]
     }
   ];

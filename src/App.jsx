@@ -3,7 +3,7 @@ import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard/Dashboard';
 import UserPolicies from './pages/UserPolicies/UserPolicies';
 import ActivityLog from './pages/ActivityLog/ActivityLog';
-import SystemConfiguration from './pages/SystemConfiguration/SystemConfiguration';
+import Settings from './pages/Settings/Settings';
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="user-policies" element={<UserPolicies />} />
           <Route path="activity-log" element={<ActivityLog />} />
-          <Route path="system-configuration" element={<SystemConfiguration />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </Router>
